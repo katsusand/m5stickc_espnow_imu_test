@@ -1,0 +1,17 @@
+menu "M5StickC board"
+
+choice M5STICKC_BOARD
+    prompt "Target board"
+    default M5STICKC_BOARD_PLUS
+    help
+        Select the M5StickC variant used by this firmware.
+
+config M5STICKC_BOARD_PLUS
+    bool "M5StickC Plus (4 MB flash)"
+
+config M5STICKC_BOARD_PLUS2
+    bool "M5StickC Plus2 (8 MB flash)"
+
+endchoice
+
+endmenu
