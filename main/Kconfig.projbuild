@@ -1,16 +1,23 @@
-menu "M5StickC board"
+menu "M5Stick board"
 
 choice M5STICKC_BOARD
     prompt "Target board"
+    default M5STICK_BOARD_S3 if IDF_TARGET_ESP32S3
     default M5STICKC_BOARD_PLUS
     help
-        Select the M5StickC variant used by this firmware.
+        Select the M5Stick variant used by this firmware.
 
 config M5STICKC_BOARD_PLUS
     bool "M5StickC Plus (4 MB flash)"
+    depends on IDF_TARGET_ESP32
 
 config M5STICKC_BOARD_PLUS2
     bool "M5StickC Plus2 (8 MB flash)"
+    depends on IDF_TARGET_ESP32
+
+config M5STICK_BOARD_S3
+    bool "M5StickS3 (ESP32-S3)"
+    depends on IDF_TARGET_ESP32S3
 
 endchoice
 

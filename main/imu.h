@@ -12,5 +12,10 @@ typedef struct {
     float temperature_c;
 } imu_sample_t;
 
+typedef struct board_imu_driver {
+    esp_err_t (*init)(void);
+    esp_err_t (*read_sample)(imu_sample_t *out_sample);
+} board_imu_driver_t;
+
 esp_err_t imu_init(void);
 esp_err_t imu_read_sample(imu_sample_t *out_sample);

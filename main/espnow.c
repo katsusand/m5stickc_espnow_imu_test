@@ -14,6 +14,20 @@ static const uint8_t BROADCAST_ADDR[ESP_NOW_ETH_ALEN] = {
 };
 static espnow_config_t s_config;
 
+static esp_err_t ensure_peer(const uint8_t peer_addr[ESP_NOW_ETH_ALEN])
+{
+    if (esp_now_is_peer_exist(peer_addr)) {
+        return ESP_OK;
+    }
+
+    esp_now_peer_info_t peer = { 0 };
+    memcpy(peer.peer_addr, peer_addr, sizeof(peer.peer_addr));
+    peer.ifidx = WIFI_IF_STA;
+    peer.channel = s_config.wifi_channel;
+    peer.encrypt = false;
+    return esp_now_add_peer(&peer);
+}
+
 static esp_err_t init_nvs(void)
 {
     esp_err_t ret = nvs_flash_init();
@@ -63,12 +77,7 @@ esp_err_t espnow_init(const espnow_config_t *config)
     ESP_RETURN_ON_ERROR(esp_now_register_recv_cb(receive_callback), TAG, "Register receive callback");
     ESP_RETURN_ON_ERROR(esp_now_register_send_cb(send_callback), TAG, "Register send callback");
 
-    esp_now_peer_info_t broadcast_peer = { 0 };
-    memcpy(broadcast_peer.peer_addr, BROADCAST_ADDR, sizeof(broadcast_peer.peer_addr));
-    broadcast_peer.ifidx = WIFI_IF_STA;
-    broadcast_peer.channel = config->wifi_channel;
-    broadcast_peer.encrypt = false;
-    ESP_RETURN_ON_ERROR(esp_now_add_peer(&broadcast_peer), TAG, "Add broadcast peer");
+    ESP_RETURN_ON_ERROR(ensure_peer(BROADCAST_ADDR), TAG, "Add broadcast peer");
 
     return ESP_OK;
 }
@@ -77,6 +86,14 @@ esp_err_t espnow_send_broadcast(const void *data, size_t data_len)
 {
     ESP_RETURN_ON_FALSE(data != NULL && data_len > 0, ESP_ERR_INVALID_ARG, TAG, "Payload is required");
     return esp_now_send(BROADCAST_ADDR, data, data_len);
+}
+
+esp_err_t espnow_send(const uint8_t dest_addr[ESPNOW_MAC_ADDR_LEN], const void *data, size_t data_len)
+{
+    ESP_RETURN_ON_FALSE(dest_addr != NULL, ESP_ERR_INVALID_ARG, TAG, "Destination MAC is required");
+    ESP_RETURN_ON_FALSE(data != NULL && data_len > 0, ESP_ERR_INVALID_ARG, TAG, "Payload is required");
+    ESP_RETURN_ON_ERROR(ensure_peer(dest_addr), TAG, "Add peer");
+    return esp_now_send(dest_addr, data, data_len);
 }
 
 esp_err_t espnow_get_self_mac(uint8_t mac_addr[ESPNOW_MAC_ADDR_LEN])

@@ -40,6 +40,7 @@ sdkconfig.old
 sdkconfig.*
 !sdkconfig.defaults.plus
 !sdkconfig.defaults.plus2
+!sdkconfig.defaults.s3
 
 # Toolchain and component-manager state
 .espressif/
