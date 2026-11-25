@@ -2,6 +2,7 @@
 
 #include "esp_check.h"
 #include "esp_event.h"
+#include "esp_idf_version.h"
 #include "esp_netif.h"
 #include "esp_now.h"
 #include "esp_wifi.h"
@@ -47,12 +48,23 @@ static void receive_callback(const esp_now_recv_info_t *info, const uint8_t *dat
     s_config.receive_callback(info->src_addr, data, (size_t)data_len);
 }
 
+/* ESP-IDF 5.5 changed the send callback's first argument from the destination MAC
+ * to an esp_now_send_info_t (which carries des_addr). */
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 5, 0)
+static void send_callback(const esp_now_send_info_t *tx_info, esp_now_send_status_t status)
+{
+    if (s_config.send_callback != NULL && tx_info != NULL) {
+        s_config.send_callback(tx_info->des_addr, status == ESP_NOW_SEND_SUCCESS);
+    }
+}
+#else
 static void send_callback(const uint8_t *dest_addr, esp_now_send_status_t status)
 {
     if (s_config.send_callback != NULL) {
         s_config.send_callback(dest_addr, status == ESP_NOW_SEND_SUCCESS);
     }
 }
+#endif
 
 esp_err_t espnow_init(const espnow_config_t *config)
 {

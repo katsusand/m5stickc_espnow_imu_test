@@ -34,7 +34,7 @@ Flash the same firmware to two or more M5StickC devices, then press Button A on 
 ## Building
 
 Use `tools/idf.sh <plus|plus2|s3> <idf.py arguments>`. It runs `idf.py` (ESP-IDF
-v5.4.3) with the board's own build directory, `sdkconfig`, `sdkconfig.defaults.<board>`
+v5.5.6) with the board's own build directory, `sdkconfig`, `sdkconfig.defaults.<board>`
 and `IDF_TARGET`, so one board's configuration is never reused for another:
 
 ```sh
@@ -66,7 +66,9 @@ Notes:
   port auto-detected, for any board.
 - The boot log's first app line names the board (`Starting M5StickC Plus2 ...`);
   check it after flashing.
-- `idf.py` v5.4.3 has no CMake preset support (`--preset` exists only in ESP-IDF v6),
+- ESP-IDF v5.5.6 is the default; `main/espnow.c` also builds on 5.4.x (the ESP-NOW
+  send callback signature changed in 5.5 and is selected by `ESP_IDF_VERSION`).
+- `idf.py` v5.5.6 has no CMake preset support (`--preset` exists only in ESP-IDF v6),
   hence the wrapper instead of `CMakePresets.json`.
 
 ## Board Abstraction

@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-IDF_ACTIVATE_SH="${HOME}/.espressif/tools/activate_idf_v5.4.3.sh"
+IDF_ACTIVATE_SH="${HOME}/.espressif/tools/activate_idf_v5.5.6.sh"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 usage() {
@@ -77,7 +77,7 @@ set +u
 source "$2" || true
 set -u
 if [[ -z "${IDF_PATH:-}" ]] || ! command -v python >/dev/null 2>&1; then
-    echo "error: ESP-IDF v5.4.3 is not usable after activation." >&2
+    echo "error: ESP-IDF v5.5.6 is not usable after activation." >&2
     exit 1
 fi
 exec python "${IDF_PATH}/tools/idf.py" \
