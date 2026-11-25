@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Flash and monitor one board at a low baud rate (default 115200).
-# M5StickC Plus / Plus2 often fail at idf.py's default 460800 bps with
-# "Unable to verify flash chip connection".
+# M5StickC Plus fails at idf.py's default 460800 bps with
+# "Unable to verify flash chip connection". (tools/idf.sh already defaults the
+# plus board to 115200; this script adds port auto-detection and monitor.)
 #
 #   tools/flash_slow.sh <plus|plus2|s3> [port] [baud]
 #

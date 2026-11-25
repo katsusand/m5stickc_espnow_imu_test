@@ -49,6 +49,24 @@ if [[ -f "${sdkconfig}" ]] && ! grep -q "^${board_symbol}=y" "${sdkconfig}"; the
     exit 1
 fi
 
+# M5StickC Plus (not Plus2) fails to flash at idf.py's default 460800 bps
+# ("Unable to verify flash chip connection"), so default it to 115200 unless -b is given.
+extra_args=()
+if [[ "${board}" == "plus" ]]; then
+    wants_flash=0
+    has_baud=0
+    for arg in "$@"; do
+        case "${arg}" in
+            flash) wants_flash=1 ;;
+            -b|--baud|-b[0-9]*|--baud=*) has_baud=1 ;;
+        esac
+    done
+    if [[ ${wants_flash} -eq 1 && ${has_baud} -eq 0 ]]; then
+        extra_args=(-b 115200)
+        echo "== ${label}: flashing at 115200 bps (pass -b to override)"
+    fi
+fi
+
 echo "== ${label}: target=${target} build=${build_dir} defaults=${defaults}"
 
 bash -lc '
@@ -64,7 +82,7 @@ if [[ -z "${IDF_PATH:-}" ]] || ! command -v python >/dev/null 2>&1; then
 fi
 exec python "${IDF_PATH}/tools/idf.py" \
     -DIDF_TARGET="$3" -D SDKCONFIG="$4" -D SDKCONFIG_DEFAULTS="$5" -B "$6" "${@:7}"
-' bash "${PROJECT_ROOT}" "${IDF_ACTIVATE_SH}" "${target}" "${sdkconfig}" "${defaults}" "${build_dir}" "$@"
+' bash "${PROJECT_ROOT}" "${IDF_ACTIVATE_SH}" "${target}" "${sdkconfig}" "${defaults}" "${build_dir}" ${extra_args[@]+"${extra_args[@]}"} "$@"
 
 if [[ -f "${sdkconfig}" ]]; then
     flash_size="$(sed -n 's/^CONFIG_ESPTOOLPY_FLASHSIZE="\(.*\)"/\1/p' "${sdkconfig}")"
