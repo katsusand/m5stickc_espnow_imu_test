@@ -31,56 +31,38 @@ receiver such as `espnow_logger_cyd`.
 
 Flash the same firmware to two or more M5StickC devices, then press Button A on one device to control the red LED on the others.
 
-## Board Selection
+## Building
 
-This project keeps one shared app and selects a board configuration in:
-
-```sh
-idf.py menuconfig
-```
-
-Then open:
-
-```text
-M5Stick board -> Target board
-```
-
-Choose one of:
-
-- `M5StickC Plus (4 MB flash)`
-- `M5StickC Plus2 (8 MB flash)`
-- `M5StickS3 (ESP32-S3)`
-
-The current default is `M5StickC Plus`.
-
-Flash size is detected from the connected device when flashing, so switching the
-target board does not require a separate flash-size change. The separate build
-configurations below still use the matching size in generated images.
-
-## Separate Builds
-
-You can also keep separate sdkconfig/build directories:
+Use `tools/idf.sh <plus|plus2|s3> <idf.py arguments>`. It runs `idf.py` (ESP-IDF
+v5.4.3) with the board's own build directory, `sdkconfig`, `sdkconfig.defaults.<board>`
+and `IDF_TARGET`, so one board's configuration is never reused for another:
 
 ```sh
-idf.py -D SDKCONFIG=sdkconfig.plus \
-  -D SDKCONFIG_DEFAULTS=sdkconfig.defaults.plus \
-  -B build-plus build
+tools/idf.sh plus2 build
+tools/idf.sh plus2 -p /dev/cu.usbserial-XXXX flash monitor
+tools/idf.sh s3 build
+tools/idf.sh plus build
 ```
 
-```sh
-idf.py -D SDKCONFIG=sdkconfig.plus2 \
-  -D SDKCONFIG_DEFAULTS=sdkconfig.defaults.plus2 \
-  -B build-plus2 build
-```
+| Board | Build directory | Defaults file | Target | Flash header |
+| --- | --- | --- | --- | --- |
+| `plus` (M5StickC Plus) | `build-plus/` | `sdkconfig.defaults.plus` | `esp32` | 4 MB |
+| `plus2` (M5StickC Plus2) | `build-plus2/` | `sdkconfig.defaults.plus2` | `esp32` | 8 MB |
+| `s3` (M5StickS3) | `build-s3/` | `sdkconfig.defaults.s3` | `esp32s3` | 8 MB |
 
-For M5StickS3, use an ESP32-S3 target and a separate build directory:
+Notes:
 
-```sh
-idf.py -DIDF_TARGET=esp32s3 \
-  -D SDKCONFIG=sdkconfig.s3 \
-  -D SDKCONFIG_DEFAULTS=sdkconfig.defaults.s3 \
-  -B build-s3 build
-```
+- `sdkconfig.defaults.<board>` is not loaded automatically by ESP-IDF (only
+  `sdkconfig.defaults` and `sdkconfig.defaults.<target>` are). Plain `idf.py build`
+  in the repo root ignores it and picks the Kconfig default board, which is how a
+  Plus image ends up on a Plus2. Always build through the wrapper.
+- Defaults are applied only when the `sdkconfig` is created. To change the board
+  or flash size, delete the `build-<board>/` directory; the wrapper refuses to run
+  on an `sdkconfig` that belongs to a different board.
+- The boot log's first app line names the board (`Starting M5StickC Plus2 ...`);
+  check it after flashing.
+- `idf.py` v5.4.3 has no CMake preset support (`--preset` exists only in ESP-IDF v6),
+  hence the wrapper instead of `CMakePresets.json`.
 
 ## Board Abstraction
 
