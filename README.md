@@ -59,6 +59,9 @@ Notes:
 - Defaults are applied only when the `sdkconfig` is created. To change the board
   or flash size, delete the `build-<board>/` directory; the wrapper refuses to run
   on an `sdkconfig` that belongs to a different board.
+- M5StickC Plus / Plus2 often fail to flash at the default 460800 bps with
+  `Unable to verify flash chip connection`. Use `tools/flash_slow.sh <board> [port] [baud]`
+  (115200 bps by default, port auto-detected), or pass `-b 115200` to `tools/idf.sh`.
 - The boot log's first app line names the board (`Starting M5StickC Plus2 ...`);
   check it after flashing.
 - `idf.py` v5.4.3 has no CMake preset support (`--preset` exists only in ESP-IDF v6),
